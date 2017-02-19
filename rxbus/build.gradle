@@ -1,5 +1,8 @@
 apply plugin: 'com.android.library'
-apply plugin: 'com.novoda.bintray-release'//添加
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'
+
+version = "1.0.0"
 
 android {
     compileSdkVersion 25
@@ -9,7 +12,7 @@ android {
         minSdkVersion 9
         targetSdkVersion 25
         versionCode 1
-        versionName "1.0.0"
+        versionName version
     }
     buildTypes {
         release {
@@ -26,16 +29,83 @@ dependencies {
     })
     testCompile 'junit:junit:4.12'
     compile 'com.jakewharton.rxrelay2:rxrelay:2.0.0'
+    provided 'io.reactivex.rxjava2:rxjava:2.0.1'
+    provided 'io.reactivex.rxjava2:rxandroid:2.0.1'
+
 }
 
-def siteUrl = 'https://github.com/kuwork/rxbus'      // 项目的主页
-def gitUrl = 'https://github.com/kuwork/rxbus.git'   // Git仓库的url
-//添加
-publish {
-    userOrg = 'kuowrk'//bintray.com用户名
-    groupId = 'com.kw'//jcenter上的路径
-    artifactId = 'rxbus'//项目名称
-    publishVersion = '1.0.0'//版本号
-    desc = '基于Rxjava2+RxDelay 的RxBus'//描述，不重要
-    website = siteUrl//网站，最好有，不重要
+def siteUrl = 'https://github.com/kuwork/rxbus'    // project homepage
+def gitUrl = 'https://github.com/kuwork/rxbus.git' // project git
+
+group = "com.kw"
+
+install {
+    repositories.mavenInstaller {
+        // This generates POM.xml with proper parameters
+        pom {
+            project {
+                packaging 'jar'
+                name 'RxBus'
+                url siteUrl
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id 'rxbus'
+                        name 'com.kw.rxbus'
+                        email 'kuwork@126.com'
+                    }
+                }
+                scm {
+                    connection gitUrl
+                    developerConnection gitUrl
+                    url siteUrl
+                }
+            }
+        }
+    }
+}
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+Properties properties = new Properties()
+boolean isHasFile = false
+if (project.rootProject.file('local.properties') != null){
+    isHasFile = true
+    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+}
+bintray {
+    user = isHasFile ? properties.getProperty("bintray.user") : System.getenv("bintray.user")
+    key = isHasFile ? properties.getProperty("bintray.apikey") : System.getenv("bintray.apikey")
+    configurations = ['archives']
+    pkg {
+        repo = "maven"
+        name = "rxbus"
+        websiteUrl = siteUrl
+        vcsUrl = gitUrl
+        licenses = ["Apache-2.0"]
+        publish = true
+    }
 }
