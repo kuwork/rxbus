@@ -26,18 +26,47 @@ RxBus.getInstance().send(new UserEvent(1,"名字"));
 ## 接受事件
 
 ```java
-RxBus.getInstance().toObservable(UserEvent.class).subscribe(new Consumer<UserEvent>() {
+//注册
+disposable = RxBus.getInstance().register(UserEvent.class, AndroidSchedulers.mainThread(), new Consumer<UserEvent>() {
             @Override
             public void accept(UserEvent userEvent) {
                 btnNext.setText(userEvent.getName());
-                Toast.makeText(getBaseContext(),userEvent.toString(),Toast.LENGTH_SHORT).show();
+                Toast.makeText(getBaseContext(), userEvent.toString(), Toast.LENGTH_SHORT).show();
+                Log.d("AActivity", "onNext:" + Thread.currentThread().getName());
+                throw new NullPointerException("空指针错误");//发生错误之后，会取消订阅
             }
         }, new Consumer<Throwable>() {
             @Override
             public void accept(Throwable throwable) throws Exception {
+                //发生错误后仅仅会进入一次，因为发生错误之后，会取消订阅
+                Toast.makeText(getBaseContext(), throwable.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+        //上下两段代码具有相同意义
+disposable=RxBus.getInstance().toObservable(UserEvent.class)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<UserEvent>() {
+            @Override
+            public void accept(UserEvent userEvent) throws Exception {
+                btnNext.setText(userEvent.getName());
+                Toast.makeText(getBaseContext(),userEvent.toString(),Toast.LENGTH_SHORT).show();
+                Log.d("AActivity","onNext:"+Thread.currentThread().getName());
+                throw new NullPointerException("空指针错误");//发生错误之后，会取消订阅
+            }
+        },new Consumer<Throwable>() {
+            @Override
+            public void accept(Throwable throwable) throws Exception {
+                //发生错误后仅仅会进入一次，因为发生错误之后，会取消订阅
                 Toast.makeText(getBaseContext(),throwable.getMessage(),Toast.LENGTH_SHORT).show();
             }
         });
+
+//解除
+@Override
+protected void onDestroy() {
+    super.onDestroy();
+    RxBus.getInstance().unregister(disposable);
+}
 ```
 
 Download
