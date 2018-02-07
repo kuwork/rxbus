@@ -12,9 +12,10 @@ import io.reactivex.functions.Consumer;
 
 
 /**
- * @author <a href="mailto:jaredsburrows@gmail.com">Jared Burrows</a>
+ * @author <a href="mailto:kuwork@126.com">Jerry</a>
  */
-public final class RxBus {
+public enum RxBus {
+    INSTANCE;
     private Relay<Object> bus = null;
     private static RxBus instance;
 
@@ -24,14 +25,7 @@ public final class RxBus {
     }
 
     public static RxBus getInstance() {
-        if (instance == null) {
-            synchronized (RxBus.class) {
-                if (instance == null) {
-                    instance = new RxBus();
-                }
-            }
-        }
-        return instance;
+        return  RxBus.INSTANCE;
     }
 
     public void send(Object event) {

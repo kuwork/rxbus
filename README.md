@@ -77,13 +77,13 @@ Maven:
 <dependency>
   <groupId>com.kw</groupId>
   <artifactId>rxbus</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
   <type>pom</type>
 </dependency>
 ```
 Gradle:
 ```groovy
-compile 'com.kw:rxbus:1.0.1'
+compile 'com.kw:rxbus:1.0.2'
 ```
 
 
