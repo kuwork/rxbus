@@ -1,11 +1,8 @@
 package com.rxbustest;
 
 import android.content.Intent;
-import android.content.res.ObbInfo;
-import android.icu.lang.UCharacter;
-import android.os.UserHandle;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -14,7 +11,6 @@ import com.kw.rxbus.RxBus;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 
@@ -28,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setTitle("Main");
         ButterKnife.bind(this);
         disposable=RxBus.getInstance().register(UserEvent.class, new Consumer<UserEvent>() {
             @Override

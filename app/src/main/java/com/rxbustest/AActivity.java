@@ -26,13 +26,14 @@ public class AActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_a);
         ButterKnife.bind(this);
+        setTitle("A");
         disposable = RxBus.getInstance().register(UserEvent.class, AndroidSchedulers.mainThread(), new Consumer<UserEvent>() {
             @Override
             public void accept(UserEvent userEvent) {
                 btnNext.setText(userEvent.getName());
                 Toast.makeText(getBaseContext(), userEvent.toString(), Toast.LENGTH_SHORT).show();
                 Log.d("AActivity", "onNext:" + Thread.currentThread().getName());
-                throw new NullPointerException("空指针错误");//发生错误之后，会取消订阅
+//                throw new NullPointerException("空指针错误");//发生错误之后，会取消订阅
             }
         }, new Consumer<Throwable>() {
             @Override
@@ -68,7 +69,12 @@ public class AActivity extends AppCompatActivity {
 
     @OnClick(R.id.btnSend)
     public void OnBtnSend() {
-        RxBus.getInstance().send(new UserEvent(1, "名字A"));
+        RxBus.getInstance().send(new UserEvent(1, "前往B:名字A"));
+    }
+
+    @OnClick(R.id.btnSendSticky)
+    public void OnBtnSendSticky() {
+        RxBus.getInstance().sendSticky(new UserEvent(1, "A粘性A"));
     }
 
     @Override

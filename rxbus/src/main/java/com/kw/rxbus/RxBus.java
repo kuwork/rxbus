@@ -2,6 +2,7 @@ package com.kw.rxbus;
 
 import com.jakewharton.rxrelay2.PublishRelay;
 import com.jakewharton.rxrelay2.Relay;
+import com.jakewharton.rxrelay2.ReplayRelay;
 
 import io.reactivex.Observable;
 import io.reactivex.Scheduler;
@@ -16,28 +17,43 @@ import io.reactivex.functions.Consumer;
  */
 public enum RxBus {
     INSTANCE;
+    //粘性事件(一个粘性事件被发布在较早之前,注册为订阅者后,将会收到之前发布的粘性事件)
+    private Relay<Object> busSticky = null;
     private Relay<Object> bus = null;
     private static RxBus instance;
 
     //禁用构造方法
     private RxBus() {
         bus = PublishRelay.create().toSerialized();
+        busSticky = ReplayRelay.create().toSerialized();
     }
 
     public static RxBus getInstance() {
-        return  RxBus.INSTANCE;
+        return RxBus.INSTANCE;
     }
 
     public void send(Object event) {
         bus.accept(event);
     }
 
-    public  <T> Observable<T> toObservable(Class<T> eventType) {
+    public void sendSticky(Object event) {
+        busSticky.accept(event);
+    }
+
+    public <T> Observable<T> toObservable(Class<T> eventType) {
         return bus.ofType(eventType);
+    }
+
+    public <T> Observable<T> toObservableSticky(Class<T> eventType) {
+        return busSticky.ofType(eventType);
     }
 
     public boolean hasObservers() {
         return bus.hasObservers();
+    }
+
+    public boolean hasObserversSticky() {
+        return busSticky.hasObservers();
     }
 
     public <T> Disposable register(Class<T> eventType, Scheduler scheduler, Consumer<T> onNext) {
@@ -74,6 +90,43 @@ public enum RxBus {
 
     public <T> Disposable register(Class<T> eventType, Consumer<T> onNext, Consumer onError) {
         return toObservable(eventType).observeOn(AndroidSchedulers.mainThread()).subscribe(onNext, onError);
+    }
+
+    //注册粘性事件
+    public <T> Disposable registerSticky(Class<T> eventType, Scheduler scheduler, Consumer<T> onNext) {
+        return toObservableSticky(eventType).observeOn(scheduler).subscribe(onNext);
+    }
+
+    public <T> Disposable registerSticky(Class<T> eventType, Scheduler scheduler, Consumer<T> onNext, Consumer onError,
+                                         Action onComplete, Consumer onSubscribe) {
+        return toObservableSticky(eventType).observeOn(scheduler).subscribe(onNext, onError, onComplete, onSubscribe);
+    }
+
+    public <T> Disposable registerSticky(Class<T> eventType, Scheduler scheduler, Consumer<T> onNext, Consumer onError,
+                                         Action onComplete) {
+        return toObservableSticky(eventType).observeOn(scheduler).subscribe(onNext, onError, onComplete);
+    }
+
+    public <T> Disposable registerSticky(Class<T> eventType, Scheduler scheduler, Consumer<T> onNext, Consumer onError) {
+        return toObservableSticky(eventType).observeOn(scheduler).subscribe(onNext, onError);
+    }
+
+    public <T> Disposable registerSticky(Class<T> eventType, Consumer<T> onNext) {
+        return toObservableSticky(eventType).observeOn(AndroidSchedulers.mainThread()).subscribe(onNext);
+    }
+
+    public <T> Disposable registerSticky(Class<T> eventType, Consumer<T> onNext, Consumer onError,
+                                         Action onComplete, Consumer onSubscribe) {
+        return toObservableSticky(eventType).observeOn(AndroidSchedulers.mainThread()).subscribe(onNext, onError, onComplete, onSubscribe);
+    }
+
+    public <T> Disposable registerSticky(Class<T> eventType, Consumer<T> onNext, Consumer onError,
+                                         Action onComplete) {
+        return toObservableSticky(eventType).observeOn(AndroidSchedulers.mainThread()).subscribe(onNext, onError, onComplete);
+    }
+
+    public <T> Disposable registerSticky(Class<T> eventType, Consumer<T> onNext, Consumer onError) {
+        return toObservableSticky(eventType).observeOn(AndroidSchedulers.mainThread()).subscribe(onNext, onError);
     }
 
     public void unregister(Disposable disposable) {
