@@ -3,6 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/RxBusTest.iml" filepath="$PROJECT_DIR$/RxBusTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/RxRelay/RxRelay.iml" filepath="$PROJECT_DIR$/RxRelay/RxRelay.iml" />
+      <module fileurl="file://$PROJECT_DIR$/RxRelay/RxRelay.iml" filepath="$PROJECT_DIR$/RxRelay/RxRelay.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/rxbus.iml" filepath="$PROJECT_DIR$/rxbus.iml" />
       <module fileurl="file://$PROJECT_DIR$/rxbus/rxbus.iml" filepath="$PROJECT_DIR$/rxbus/rxbus.iml" />

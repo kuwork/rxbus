@@ -74,7 +74,10 @@ public class AActivity extends AppCompatActivity {
 
     @OnClick(R.id.btnSendSticky)
     public void OnBtnSendSticky() {
-        RxBus.getInstance().sendSticky(new UserEvent(1, "A粘性A"));
+        UserEvent event = new UserEvent(1, "A粘性A");
+        RxBus.getInstance().sendSticky(event);
+        RxBus.getInstance().sendSticky(new UserEvent(1, "B粘性B"));
+        RxBus.getInstance().sendSticky(event);
     }
 
     @Override

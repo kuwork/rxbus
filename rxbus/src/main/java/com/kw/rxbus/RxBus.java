@@ -1,5 +1,7 @@
 package com.kw.rxbus;
 
+import android.util.Log;
+
 import com.jakewharton.rxrelay2.PublishRelay;
 import com.jakewharton.rxrelay2.Relay;
 import com.jakewharton.rxrelay2.ReplayRelay;
@@ -10,6 +12,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
+import io.reactivex.subjects.ReplaySubject;
 
 
 /**
@@ -18,14 +21,15 @@ import io.reactivex.functions.Consumer;
 public enum RxBus {
     INSTANCE;
     //粘性事件(一个粘性事件被发布在较早之前,注册为订阅者后,将会收到之前发布的粘性事件)
-    private Relay<Object> busSticky = null;
+    private ReplayRelay<Object> busSticky = null;
     private Relay<Object> bus = null;
     private static RxBus instance;
 
     //禁用构造方法
     private RxBus() {
         bus = PublishRelay.create().toSerialized();
-        busSticky = ReplayRelay.create().toSerialized();
+        busSticky = ReplayRelay.create();
+        ReplaySubject.create().toSerialized();
     }
 
     public static RxBus getInstance() {
@@ -128,6 +132,14 @@ public enum RxBus {
     public <T> Disposable registerSticky(Class<T> eventType, Consumer<T> onNext, Consumer onError) {
         return toObservableSticky(eventType).observeOn(AndroidSchedulers.mainThread()).subscribe(onNext, onError);
     }
+
+    public synchronized void removeSticky(Object event) {
+        if (busSticky != null) {
+            Log.d("Sticky", busSticky.getValues().toString() + ",size = " + busSticky.getValues().length);
+            busSticky.remove(event);
+        }
+    }
+
 
     public void unregister(Disposable disposable) {
         if (disposable != null && !disposable.isDisposed()) {
