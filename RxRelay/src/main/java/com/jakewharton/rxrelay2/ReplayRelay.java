@@ -221,6 +221,14 @@ public final class ReplayRelay<T> extends Relay<T> {
         }
     }
 
+
+    public void remove(T value) {
+        if (value == null) throw new NullPointerException("value == null");
+        ReplayBuffer<T> b = buffer;
+        b.remove(value);
+    }
+
+
     @Override
     public boolean hasObservers() {
         return observers.get().length != 0;
@@ -334,6 +342,8 @@ public final class ReplayRelay<T> extends Relay<T> {
 
         void add(T value);
 
+        void remove(T value);
+
         void replay(ReplayDisposable<T> rs);
 
         int size();
@@ -391,6 +401,12 @@ public final class ReplayRelay<T> extends Relay<T> {
         public void add(T value) {
             buffer.add(value);
             size++;
+        }
+
+        @Override
+        public synchronized void remove(T value) {
+            buffer.remove(value);
+            size--;
         }
 
         @Override
@@ -555,6 +571,33 @@ public final class ReplayRelay<T> extends Relay<T> {
             t.set(n); // releases both the tail and size
 
             trim();
+        }
+
+        @Override
+        public void remove(T value) {
+            if (value == null) {
+                return;
+            }
+            Node<T> target = null;
+            Node<T> h = head;
+            if (value.equals(h.value)) {
+                head = h.get();
+                size--;
+                trim();
+                return;
+            }
+            for (; ; ) {
+                Node<T> next = h.get();
+                if (next == null) {
+                    break;
+                }
+                if (value.equals(next.value)) {
+                    h.set(next.get());
+                    size--;
+                } else {
+                    h = next;
+                }
+            }
         }
 
         @Override
@@ -740,6 +783,33 @@ public final class ReplayRelay<T> extends Relay<T> {
             t.set(n); // releases both the tail and size
 
             trim();
+        }
+
+        @Override
+        public void remove(T value) {
+            if (value == null) {
+                return;
+            }
+            TimedNode<T> target = null;
+            TimedNode<T> h = head;
+            if (value.equals(h.value)) {
+                head = h.get();
+                size--;
+                trim();
+                return;
+            }
+            for (; ; ) {
+                TimedNode<T> next = h.get();
+                if (next == null) {
+                    break;
+                }
+                if (value.equals(next.value)) {
+                    h.set(next.get());
+                    size--;
+                } else {
+                    h = next;
+                }
+            }
         }
 
         @Override
